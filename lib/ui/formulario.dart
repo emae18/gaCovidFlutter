@@ -68,8 +68,8 @@ class Post {
 }
 
 class _MyFormularioPage extends State<MyFormularioPage> {
-  static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
-  //static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
+  //static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
+  static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
 
   static const headers = {
     'apiKey': '12039i10238129038',
@@ -99,7 +99,8 @@ class _MyFormularioPage extends State<MyFormularioPage> {
   File _dniFile;
   File selfieFile;
   final _formKey = GlobalKey<FormState>();
-  var _formEnviado = true;
+  var _aceptarHabilitado = true;
+  var _menuHabilitado = false;
 
   void initState() {
     super.initState();
@@ -112,10 +113,10 @@ class _MyFormularioPage extends State<MyFormularioPage> {
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-
     _telefonoController.text = '388';
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _handleConfirmFirstMesseage(_scaffoldKey));
+    setupNotification();
   }
 
   @override
@@ -138,7 +139,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                 children: <Widget>[
                   Center(
                     child: Text(
-                      'Instrucciones',
+                      'Registro',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 50.0,
@@ -157,7 +158,8 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                   SizedBox(height: 20.0),
                   Center(
                     child: Text(
-                      'El gobierno de Jujuy le brindará ayuda, consejos e información sobre su estado y el estado en el que se encuentra la provinica respecto al coronavirus.',
+                      'El gobierno de Jujuy brindara ayuda, consejos e información sobre su estado y también sobre el operativo provincial con respecto al Covid19.'
+                      ' Manténgase informado de las recomendaciones en la página oficial del COE.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 22.0,
@@ -341,8 +343,8 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                 errorStyle: TextStyle(
                                   color: Colors.white,
                                 ),
-                                hintText: 'Ingrese el nro de su calle actual',
-                                labelText: 'Nro de calle',
+                                hintText: 'Ingrese el nro de su domicilio actual',
+                                labelText: 'Nro',
                                 labelStyle: TextStyle(
                                   fontFamily: 'Montserrat',
                                   fontWeight: FontWeight.bold,
@@ -395,7 +397,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                   //SizedBox(height: 40.0),
                   SizedBox(height: 20.0),
                   Visibility(
-                    visible: _formEnviado,
+                    visible: _aceptarHabilitado,
                     child: RaisedButton(
                       padding: EdgeInsets.only(
                           top: 10.0, bottom: 10.0, left: 100.0, right: 100.0),
@@ -407,7 +409,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                       ),
                       onPressed: () async {
                         setState(() {
-                          _formEnviado = false;
+                          _aceptarHabilitado = false;
                         });
                         //bool imagesUploaded = ! (_dniFile == null) || !(selfieFile == null) ? false : true;
                         if (_formKey.currentState.validate()) {
@@ -426,34 +428,29 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                           if (connectivityResult == ConnectivityResult.mobile) {
                             final result = await enviarFormulario(form);
                             saveDniCredentials(_dniController.text);
-                            //Navigator.of(context).pushNamed('/main');
-                            showInSnackBar('Formulario enviado exitosamente');
+                            showInSnackBar('Datos personales enviados con exito puede seguír al menu principal');
                             setState(() {
-                              _formEnviado = true;
+                              _menuHabilitado = true;
                             });
                           } else if (connectivityResult ==
                               ConnectivityResult.wifi) {
                             final result = await enviarFormulario(form);
                             saveDniCredentials(_dniController.text);
-                            //Navigator.of(context).pushNamed('/main');
-                            showInSnackBar('Formulario enviado exitosamente');
+                            showInSnackBar('Datos personales enviados con exito puede seguír al menu principal');
                             setState(() {
-                              _formEnviado = true;
+                              _menuHabilitado = true;
                             });
                           } else {
                             setState(() {
-                              _formEnviado = true;
+                              _aceptarHabilitado = true;
                             });
                             showInSnackBar(
-                                'Algo salió mal porfavor verifique su conexion a internet, e intente denuevo en unos segundos');
+                                'Algo salió mal por favor verifique su conexion a internet, e intente de nuevo en unos segundos');
                           }
-                          setState(() {
-                            _formEnviado = true;
-                          });
                         } else {
                           showInSnackBar('Provea todos sus datos');
                           setState(() {
-                            _formEnviado = true;
+                            _aceptarHabilitado = true;
                           });
                         }
                       },
@@ -469,7 +466,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                   ),
                   SizedBox(height: 30.0),
                   Visibility(
-                    visible: _formEnviado,
+                    visible: _menuHabilitado,
                     child: RaisedButton(
                       padding: EdgeInsets.only(
                           top: 10.0, bottom: 10.0, left: 70.0, right: 70.0),
@@ -479,7 +476,6 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                       onPressed: () {
-                        setupNotification();
                         Navigator.of(context).pushNamed('/main');
                       },
                       child: Text(
@@ -695,23 +691,28 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   void setupNotification() async {
     //HORA
-    var time = Time(19, 50, 0);
+    var time = Time(10, 0, 0);
+    var time1 = Time(14, 0, 0);
+    var time2 = Time(18, 0, 0);
+    var time3 = Time(22, 0, 0);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'repeatDailyAtTime channel id',
         'repeatDailyAtTime temperatura',
-        'repeatDailyAtTime temperatura');
+        'repeatDailyAtTime temperatura',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ongoing: true);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.showDailyAtTime(0, 'Recordatorio',
         '¡Compruebe su temperatura!', time, platformChannelSpecifics);
-    /*var androidPlatformChannelSpecifics = AndroidNotificationDetails('repeating channel id',
-        'Temperatura', 'comprobar temperatura');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.periodicallyShow(0, 'Recordatorio',
-        'Compruebe su temperatura ahora!', RepeatInterval.Hourly, platformChannelSpecifics);*/
+    await flutterLocalNotificationsPlugin.showDailyAtTime(1, 'Recordatorio',
+        '¡Compruebe su temperatura!', time1, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(2, 'Recordatorio',
+        '¡Compruebe su temperatura!', time2, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(3, 'Recordatorio',
+        '¡Compruebe su temperatura!', time3, platformChannelSpecifics);
   }
 }
 
@@ -728,8 +729,8 @@ Future<bool> confirmFirstMesseage(
             children: <Widget>[
               Center(
                 child: Text(
-                  'Esta es una herramienta para la salud pública, todos los datos que aquí ingrese son fundamentale.'
-                  'Una vez finalizado el registro no podrá modificar los datos ingresados, por favor tomese su tiempo y sea preciso.',
+                  'Esta es una herramienta para la salud pública, todos los datos que aquí ingrese son fundamentales.'
+                  ' Una vez finalizado el registro no podrá modificar los datos ingresados, por favor tomese su tiempo y sea preciso.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 22.0, fontFamily: 'Montserrat'),
                 ),

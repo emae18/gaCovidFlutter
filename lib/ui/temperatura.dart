@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:covidjujuy_app/ui/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +12,6 @@ class TemperaturaPage extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => HomePage(),
         '/main': (BuildContext context) => MyApp(),
       },
       home: MyTemperaturaPage(),
@@ -33,9 +30,9 @@ class Post {
   int temperatura;
 
   Post({
-        @required this.dni,
-        @required this.temperatura,
-      });
+    @required this.dni,
+    @required this.temperatura,
+  });
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
@@ -44,8 +41,8 @@ class Post {
     );
   }
 
-  Map<String, dynamic> toJson(){
-    return{
+  Map<String, dynamic> toJson() {
+    return {
       "dni": dni,
       "temperatura": temperatura,
     };
@@ -53,15 +50,21 @@ class Post {
 }
 
 class _MyTemperaturaPage extends State<MyTemperaturaPage> {
+  //static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
   static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
+
   static const headers = {
-    'apiKey' : '12039i10238129038',
+    'apiKey': '12039i10238129038',
     'Content-Type': 'application/json'
   };
 
-  Future<bool> enviarFormulario(Post item) {
-    return http.post(API, body: jsonEncode(item.toJson())).then((data) {
+  Future<bool> enviarTemperatura(Post item) {
+    return http.post(API, body: json.encode(item.toJson())).then((data) {
+      print('STATUS ' + data.statusCode.toString());
       if (data.statusCode == 200) {
+        setState(() {
+          _menuHabilitado = true;
+        });
         return true;
       }
       return false;
@@ -70,27 +73,42 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   var _formEnviado = true;
+  var _menuHabilitado = false;
   var _temperaturaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _savedDni = false;
   int _dni = 0;
 
-  Future<bool> _getSavedDniFromSharedPref() async{
+  Future<void> _getDniFromSharedPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final startupDniNumber = prefs.getInt('savedDniNumber');
+    if (startupDniNumber == null) {
+      setState(() {
+        _dni = 0;
+      });
+    } else {
+      setState(() {
+        _dni = startupDniNumber;
+      });
+    }
+  }
+
+  Future<bool> _getSavedDniFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int dni = await prefs.getInt('savedDniNumber');
     setState(() {
       _dni = dni;
     });
-    if(dni == null || dni == 0)
-    {
+    if (dni == null || dni == 0) {
       return false;
     }
     return true;
   }
 
-  Future<void> _savedDniQuery() async{
+  Future<void> _savedDniQuery() async {
     await _getSavedDniFromSharedPref().then(_updateSavedDni);
   }
+
   void _updateSavedDni(bool value) {
     setState(() {
       _savedDni = value;
@@ -99,7 +117,8 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
 
   @override
   void initState() {
-    _savedDniQuery();
+    _getDniFromSharedPref();
+    //_savedDniQuery();
   }
 
   @override
@@ -111,10 +130,10 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
         child: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [Colors.blue[900], Colors.lightBlue],
-              )),
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [Colors.blue[900], Colors.lightBlue],
+          )),
           height: MediaQuery.of(context).size.height,
           child: SafeArea(
             child: SingleChildScrollView(
@@ -178,58 +197,89 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
                   ),
                   SizedBox(height: 20.0),
                   Form(
-                    key: _formKey,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(left: 20.0,right: 20.0),
-                          child: TextFormField(
-                            controller: _temperaturaController,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20.0,
+                      key: _formKey,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.only(left: 20.0, right: 20.0),
+                            child: TextFormField(
+                              controller: _temperaturaController,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                              ),
+                              decoration: const InputDecoration(
+                                  errorStyle: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  hintText: 'Ingrese su temperatura',
+                                  labelText: 'Temperatura',
+                                  labelStyle: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.white))),
+                              validator: (String value) {
+                                return value.isEmpty
+                                    ? 'El campo es obligatorio'
+                                    : null;
+                              },
                             ),
-                            decoration: const InputDecoration(
-                                errorStyle: TextStyle(color: Colors.white,),
-                                hintText: 'Ingrese su temperatura',
-                                labelText: 'Temperatura',
-                                labelStyle: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                    borderSide:
-                                    BorderSide(color: Colors.white))),
-                            validator: (String value) {
-                              return value.isEmpty
-                                  ? 'El campo es obligatorio'
-                                  : null;
-                            },
                           ),
-                        ),
-                      ],
-                    )
-                  ),
+                        ],
+                      )),
                   SizedBox(height: 100.0),
                   Visibility(
                     visible: _formEnviado,
                     child: RaisedButton(
                       padding: EdgeInsets.only(
-                          top: 10.0,
-                          bottom: 10.0,
-                          left: 100.0,
-                          right: 100.0),
+                          top: 10.0, bottom: 10.0, left: 100.0, right: 100.0),
                       color: Colors.deepOrangeAccent,
                       splashColor: Colors.blueAccent,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0),
                       ),
-                      onPressed: (){
-                            Navigator.of(context).pushNamed('/main');
-                            showInSnackBar('Temperatura enviada exitosamente');
+                      onPressed: () async {
+                        setState(() {
+                          _formEnviado = false;
+                        });
+                        // Navigator.of(context).pushNamed('/main');
+                        // showInSnackBar('Temperatura enviada exitosamente');
+                        if (_formKey.currentState.validate()) {
+                          final form = Post(
+                            dni: _dni,
+                            temperatura: int.parse(_temperaturaController.text),
+                          );
+                          var connectivityResult =
+                              await (Connectivity().checkConnectivity());
+
+                          if (connectivityResult == ConnectivityResult.mobile) {
+                            final result = await enviarTemperatura(form);
+                            setState(() {
+                              _menuHabilitado = true;
+                            });
+                          } else if (connectivityResult ==
+                              ConnectivityResult.wifi) {
+                            final result = await enviarTemperatura(form);
+                            setState(() {
+                              _menuHabilitado = true;
+                            });
+                          } else {
+                            setState(() {
+                              _menuHabilitado = true;
+                            });
+                          }
+                        } else {
+                          showInSnackBar('Provea todos sus datos');
+                          setState(() {
+                            _formEnviado = true;
+                          });
+                        }
                       },
                       child: Text(
                         'Enviar',
@@ -243,26 +293,20 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
                   ),
                   SizedBox(height: 20.0),
                   Visibility(
-                    visible: _formEnviado,
+                    visible: _menuHabilitado,
                     child: RaisedButton(
                       padding: EdgeInsets.only(
-                          top: 10.0,
-                          bottom: 10.0,
-                          left: 100.0,
-                          right: 100.0),
+                          top: 10.0, bottom: 10.0, left: 100.0, right: 100.0),
                       color: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                       onPressed: () {
-                        //Navigator.of(context).pushNamed('/home');
-                        _temperaturaController.text='';
-                        _scaffoldKey.currentState.removeCurrentSnackBar();
-                        showInSnackBar('¡Por favor envíe la temperatura!');
+                        Navigator.of(context).pushNamed('/main');
                       },
                       child: Text(
-                        'Cancelar',
+                        'Menu principal',
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 22.0,
@@ -270,24 +314,6 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
                             fontFamily: 'Montserrat'),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20.0),
-                  Container(
-                    padding: EdgeInsets.only(top: 20.0),
-                    child: InkWell(
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed('/main');
-                        },
-                        child: Text(
-                          'Volver al menu principal',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Montserrat',
-                              decoration: TextDecoration.underline),
-                        )),
                   ),
                   SizedBox(height: 50.0),
                 ],
@@ -298,6 +324,7 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
       ),
     );
   }
+
   void showInSnackBar(String value) {
     SnackBar mySnackBar = SnackBar(
       content: Text(
@@ -306,7 +333,7 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
           color: Colors.white,
         ),
       ),
-    backgroundColor: Colors.pink,
+      backgroundColor: Colors.pink,
     );
     _scaffoldKey.currentState.showSnackBar(mySnackBar);
   }

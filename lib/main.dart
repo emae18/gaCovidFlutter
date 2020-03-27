@@ -7,7 +7,7 @@ import 'ui/cuestionario.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(FormularioPage());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
         '/cuestionario': (BuildContext context) => CuestionarioPage(),
+        '/formulario': (BuildContext context) => FormularioPage(),
       },
       home: MyLoginPage(),
     );
@@ -44,10 +45,12 @@ class _MyLoginPageState extends State<MyLoginPage> {
       setState(() {
         _dni = 0;
       });
+      Navigator.of(context).pushNamed('/formulario');
     } else{
       setState(() {
         _dni = startupDniNumber;
       });
+      _launchTermCondDialogConfirmation();
     }
   }
 
@@ -101,7 +104,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
   @override
   void initState() {
     _getDniFromSharedPref();
-    _launchTermCondDialogConfirmation();
     //_cleanSharedPreferences();
     super.initState();
   }
@@ -297,7 +299,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
         ),
         onTap: () {
           !_termCondAceptados? _handleFirsGeoConfirmation(_scaffoldKey):
-          showInSnackBar('Terminos y condiciones de úso aceptados');
+          showInSnackBar('Términos y condiciones de úso aceptados');
         },
       ),
       backgroundColor: Colors.pink,
@@ -310,7 +312,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
     confirmGeolocalizationDialog(context, _scaffoldKey).then((bool value) {
       if (value) {
         _setTermCondAceptadosFromSharedPref().then((bool commited){
-          showInSnackBar('Terminos y condiciones de úso aceptados');
+          //showInSnackBar('Términos y condiciones de úso aceptados');
           _launchTermCondDialogConfirmation();
         });
       } else {
