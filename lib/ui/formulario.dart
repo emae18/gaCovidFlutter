@@ -112,8 +112,9 @@ class _MyFormularioPage extends State<MyFormularioPage> {
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
+    setupNotification();
 
-    _telefonoController.text = '388';
+    _telefonoController.text = '388 15';
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _handleConfirmFirstMesseage(_scaffoldKey));
   }
@@ -479,7 +480,6 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                       onPressed: () {
-                        setupNotification();
                         Navigator.of(context).pushNamed('/main');
                       },
                       child: Text(
@@ -695,23 +695,35 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   void setupNotification() async {
     //HORA
-    var time = Time(19, 50, 0);
+    var time = Time(2, 40, 0);
+    var time1 = Time(2, 40, 0);
+    var time2 = Time(2, 41, 0);
+    var time3 = Time(2, 41, 0);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'repeatDailyAtTime channel id',
         'repeatDailyAtTime temperatura',
-        'repeatDailyAtTime temperatura');
+        'repeatDailyAtTime temperatura',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ongoing: true);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.showDailyAtTime(0, 'Recordatorio',
+    await flutterLocalNotificationsPlugin.showDailyAtTime(0, 'Recordatorio 1',
         '¡Compruebe su temperatura!', time, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(1, 'Recordatorio 2',
+        '¡Compruebe su temperatura!', time1, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(2, 'Recordatorio 3',
+        '¡Compruebe su temperatura!', time2, platformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(3, 'Recordatorio 4',
+        '¡Compruebe su temperatura!', time3, platformChannelSpecifics);
     /*var androidPlatformChannelSpecifics = AndroidNotificationDetails('repeating channel id',
-        'Temperatura', 'comprobar temperatura');
+        'Temperatura', 'comprobar temperatura', ongoing: true);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.periodicallyShow(0, 'Recordatorio',
-        'Compruebe su temperatura ahora!', RepeatInterval.Hourly, platformChannelSpecifics);*/
+        '¡Compruebe su temperatura!', RepeatInterval.Hourly, platformChannelSpecifics);*/
   }
 }
 
