@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:covidjujuy_app/ui/formulario.dart';
-import 'package:covidjujuy_app/ui/temperatura.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gps/gps.dart';
 import 'ui/cuestionario.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() => runApp(MyApp());
 
@@ -36,6 +37,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
       'https://www.argentina.gob.ar/salud/coronavirus-COVID-19';
 
   bool _termCondAceptados = false;
+  bool _locationUp = false;
   int _dni = 0;
 
   Future<void> _getDniFromSharedPref() async {
@@ -46,7 +48,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
         _dni = 0;
       });
       Navigator.of(context).pushNamed('/formulario');
-    } else{
+    } else {
       setState(() {
         _dni = startupDniNumber;
       });
@@ -57,9 +59,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
   Future<bool> _getTermCondAceptadosFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool result = await prefs.getBool('termCond');
-    if(result== null){
+    if (result == null) {
       return false;
-    }else{
+    } else {
       return true;
     }
   }
@@ -82,11 +84,11 @@ class _MyLoginPageState extends State<MyLoginPage> {
     }
   }
 
-  Future<void> _launchTermCondDialogConfirmation()async{
+  Future<void> _launchTermCondDialogConfirmation() async {
     await _getTermCondAceptadosFromSharedPref().then(_updateTermAndCondt);
-    if(!_termCondAceptados){
+    if (!_termCondAceptados) {
       WidgetsBinding.instance.addPostFrameCallback(
-              (_) => _handleFirsGeoConfirmation(_scaffoldKey));
+          (_) => _handleFirsGeoConfirmation(_scaffoldKey));
     }
   }
 
@@ -95,11 +97,107 @@ class _MyLoginPageState extends State<MyLoginPage> {
       _termCondAceptados = value;
     });
   }
-  Future<void> _cleanSharedPreferences() async{
+
+  Future<void> _cleanSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _getLatitudLongitud() async {
+    var latlng = await Gps.currentGps();
+    print('GEO POS ' + latlng.toString());
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('latitud', double.parse(latlng.lat));
+    await prefs.setDouble('longitud', double.parse(latlng.lng));
+  }
+
+  void _checkPermissions() async {
+    Map<PermissionGroup, PermissionStatus> permissions =
+        await PermissionHandler()
+            .requestPermissions([PermissionGroup.location]);
+    PermissionStatus permission = await PermissionHandler()
+        .checkPermissionStatus(PermissionGroup.location);
+    ServiceStatus serviceStatus =
+        await PermissionHandler().checkServiceStatus(PermissionGroup.location);
+
+    // PERMISO PERMITIDO
+    if (permission == PermissionStatus.granted) {
+      // SERVICIO ENCENDIDO
+      if (serviceStatus == ServiceStatus.enabled) {
+        print('SERVICIO ARRIBA ENTONCES SETEAR LONG Y LAT');
+        _getLatitudLongitud();
+        setState(() {
+          _locationUp = true;
+        });
+        _termCondAceptados ?
+          Navigator.of(context).pushNamed('/cuestionario') :
+          showInSnackBar(
+              'No podrá usar la app si no acepta los términos y condiciones de úso');
+        // PERMISO RECHAZADO
+      } else {
+        showInSnackBar(
+            'Para usar la aplicacion mantenga prendida la ubicación gps');
+      }
+      // SERVICIO ABAJO
+    } else if(permission == PermissionStatus.neverAskAgain) {
+      showDialog(
+        context: context,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0)),
+          title: Column(
+            children: <Widget>[
+              Center(
+                child: Text(
+                  'Para usar la app debe tener ubicación encendida y aceptar los permisos',
+                  style: TextStyle(
+                      fontSize: 22.0, fontFamily: 'Montserrat'),
+                ),
+              ),
+              Center(
+                child: Text(
+                  'A continuación por favor acepte los permisos',
+                  style: TextStyle(
+                      fontSize: 18.0, fontFamily: 'Montserrat'),
+                ),
+              ),
+              Center(
+                child: Text(
+                  'Si usted bloqueo los permisos que requiere la aplicación, porfavor habilitelos desde la configuracion de su dispostivo',
+                  style: TextStyle(
+                      fontSize: 18.0, fontFamily: 'Montserrat'),
+                ),
+              ),
+            ],
+          ),
+          elevation: 7.0,
+          //backgroundColor: Colors.grey,
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Abrir los permisos',
+                    style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22.0,
+                        fontFamily: 'Montserrat'),
+                  ),
+                  onPressed: () async {
+                    await PermissionHandler().openAppSettings();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -107,6 +205,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
     //_cleanSharedPreferences();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -204,13 +303,8 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24.0),
                             ),
-                            onPressed: () {
-                              _termCondAceptados
-                                  ? Navigator.of(context)
-                                      .pushNamed('/cuestionario')
-                                  : showInSnackBar(
-                                      'No podrá usar la app si no acepta los términos y condiciones de úso');
-                              ;
+                            onPressed: () async {
+                              _checkPermissions();
                             },
                             child: Text(
                               'Cuestionario covid-19',
@@ -251,6 +345,25 @@ class _MyLoginPageState extends State<MyLoginPage> {
                                   fontSize: 22.0,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Montserrat'),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      Visibility(
+                        visible: !_termCondAceptados,
+                        child: Container(
+                          child: Center(
+                            child: InkWell(
+                              child: Text(
+                                'Ver terminos y condiciones de úso',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onTap: () {
+                                _handleFirsGeoConfirmation(_scaffoldKey);
+                              },
                             ),
                           ),
                         ),
@@ -298,8 +411,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
           ),
         ),
         onTap: () {
-          !_termCondAceptados? _handleFirsGeoConfirmation(_scaffoldKey):
-          showInSnackBar('Términos y condiciones de úso aceptados');
+          !_termCondAceptados
+              ? _handleFirsGeoConfirmation(_scaffoldKey)
+              : showInSnackBar('Términos y condiciones de úso aceptados');
         },
       ),
       backgroundColor: Colors.pink,
@@ -308,20 +422,18 @@ class _MyLoginPageState extends State<MyLoginPage> {
     _scaffoldKey.currentState.showSnackBar(mySnackBar);
   }
 
-  void _handleFirsGeoConfirmation(GlobalKey<ScaffoldState> _scaffoldKey){
+  void _handleFirsGeoConfirmation(GlobalKey<ScaffoldState> _scaffoldKey) {
     confirmGeolocalizationDialog(context, _scaffoldKey).then((bool value) {
       if (value) {
-        _setTermCondAceptadosFromSharedPref().then((bool commited){
-          //showInSnackBar('Términos y condiciones de úso aceptados');
+        _setTermCondAceptadosFromSharedPref().then((bool commited) {
           _launchTermCondDialogConfirmation();
         });
       } else {
         showInSnackBar(
-            'No podrá usar la app si no acepta los términos y condiciones de úso');
+            'Para usar la aplicacion deberá aceptar los terminos y condiciones de úso');
       }
     });
   }
-
 }
 
 Future<bool> confirmGeolocalizationDialog(

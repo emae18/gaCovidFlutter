@@ -79,7 +79,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   Future<bool> enviarFormulario(Post item) {
     return http.post(API, body: json.encode(item.toJson())).then((data) {
-      print('STATUS ' + data.statusCode.toString());
+      print('STATUS ' + data.toString());
       if (data.statusCode == 200) {
         return true;
       }
@@ -112,7 +112,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-    _telefonoController.text = '388';
+    _telefonoController.text = '';
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _handleConfirmFirstMesseage(_scaffoldKey));
     setupNotification();
@@ -373,7 +373,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                 errorStyle: TextStyle(
                                   color: Colors.white,
                                 ),
-                                hintText: '388 - nro telefónico',
+                                hintText: 'Ingrese su nro telefónico',
                                 labelText: 'Nro telefónico',
                                 labelStyle: TextStyle(
                                   fontFamily: 'Montserrat',
@@ -382,10 +382,10 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                 ),
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide:
-                                        BorderSide(color: Colors.white))),
+                                    BorderSide(color: Colors.white))),
                             validator: (String value) {
                               return value.isEmpty
-                                  ? 'El campo es obligatorio'
+                                  ?  'El campo es obligatorio'
                                   : null;
                             },
                           ),
@@ -394,7 +394,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                     ),
                   ),
                   //SizedBox(height: 40.0),
-                  SizedBox(height: 20.0),
+                  SizedBox(height: 30.0),
                   Visibility(
                     visible: _aceptarHabilitado,
                     child: RaisedButton(
@@ -416,8 +416,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                             apellido: _apellidoController.text,
                             nombre: _nombreController.text,
                             direccion_calle: _direccionCalleController.text,
-                            direccion_numero:
-                                int.parse(_direccionNumeroController.text),
+                            direccion_numero: int.parse(_direccionNumeroController.text),
                             telefono: int.parse(_telefonoController.text),
                           );
                           var connectivityResult =
@@ -630,7 +629,7 @@ Future<bool> confirmFirstMesseage(
           actions: <Widget>[
             FlatButton(
               child: Text(
-                'Entendido',
+                'Aceptar',
                 style: TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

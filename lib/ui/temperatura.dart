@@ -248,8 +248,6 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
                         setState(() {
                           _formEnviado = false;
                         });
-                        // Navigator.of(context).pushNamed('/main');
-                        // showInSnackBar('Temperatura enviada exitosamente');
                         if (_formKey.currentState.validate()) {
                           final form = Post(
                             dni: _dni,

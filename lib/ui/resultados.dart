@@ -6,6 +6,7 @@ import '../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity/connectivity.dart';
+import 'package:gps/gps.dart';
 import 'temperatura.dart';
 
 class ResultadosPage extends StatelessWidget {
@@ -35,27 +36,58 @@ class MyResultadosPage extends StatefulWidget {
 
 class Post {
   int dni;
+  bool pais_riesgo;
+  bool contacto_extranjero;
+  bool fiebre;
+  bool tos;
+  bool dif_respirar;
   int riesgo;
+  double latitud;
+  double longitud;
 
   Post({
     @required this.dni,
+    @required this.pais_riesgo,
+    @required this.contacto_extranjero,
+    @required this.fiebre,
+    @required this.tos,
+    @required this.dif_respirar,
     @required this.riesgo,
+    @required this.latitud,
+    @required this.longitud
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(
       dni: json["dni"],
+      pais_riesgo: json["pais_riesgo"],
+      contacto_extranjero: json["contacto_extranjero"],
+      fiebre: json["fiebre"],
+      tos: json["tos"],
+      dif_respirar: json["dif_respirar"],
       riesgo: json["riesgo"],
+      latitud: json["latitud"],
+      longitud: json["longitud"]
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {"dni": dni, "riesgo": riesgo};
+    return {
+      "dni": dni,
+      "pais_riesgo": pais_riesgo,
+      "contacto_extranjero": contacto_extranjero,
+      "fiebre": fiebre,
+      "tos": tos,
+      "dif_respirar": dif_respirar,
+      "riesgo": riesgo,
+      "latitud": latitud,
+      "longitud": longitud
+    };
   }
 }
 
 class _MyResultadosPageState extends State<MyResultadosPage> {
-  static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
+  static const API = 'http://coe.jujuy.gob.ar/covid19/encuesta';
   //static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
 
   static const headers = {
@@ -81,6 +113,8 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
   bool _menuHabilitado = false;
   bool _savedDni = false;
   int _dni = 0;
+  double _latitud = 0;
+  double _longitud = 0;
 
   Future<void> _getDniFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -146,7 +180,14 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
   void _enviarResultadosHandler() async {
     final form = Post(
       dni: _dni,
+      pais_riesgo: widget.respuestas[0] == 1 ? true : false,
+      contacto_extranjero: widget.respuestas[1] == 1 ? true : false,
+      fiebre: widget.respuestas[2] == 1 ? true : false,
+      tos: widget.respuestas[3] == 1 ? true : false,
+      dif_respirar: widget.respuestas[4] == 1 ? true : false,
       riesgo: _riesgo,
+      latitud:  -24.385128,
+      longitud: -65.126089,
     );
     var connectivityResult =
     await (Connectivity().checkConnectivity());
@@ -169,9 +210,28 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
     }
   }
 
+  void _getLatitudLongitud() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final lat = prefs.getDouble('latitud');
+    final long = prefs.getDouble('longitud');
+
+    if (lat == null || long == null) {
+      setState(() {
+        _latitud = 0;
+        _longitud = 0;
+      });
+    } else {
+      setState(() {
+        _latitud = lat;
+        _longitud = long;
+      });
+    }
+    await _getDniFromSharedPref();
+  }
+
   @override
   void initState() {
-    _getDniFromSharedPref();
+    _getLatitudLongitud();
     _calcularRiesgo();
     //_savedDniQuery();
 
