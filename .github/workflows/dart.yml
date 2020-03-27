@@ -1,0 +1,19 @@
+name: Dart CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: oursky/flutter:v1.12.13-hotfix.5-ndk
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: flutter pub get
+    - name: Analyze
+      run: flutter analyze
