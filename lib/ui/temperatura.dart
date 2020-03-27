@@ -50,8 +50,8 @@ class Post {
 }
 
 class _MyTemperaturaPage extends State<MyTemperaturaPage> {
-  //static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
-  static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
+  static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
+  //static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
 
   static const headers = {
     'apiKey': '12039i10238129038',

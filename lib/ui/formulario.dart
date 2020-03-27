@@ -17,6 +17,7 @@ class FormularioPage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
         '/main': (BuildContext context) => MyApp(),
+        '/temperatura': (BuildContext context) => TemperaturaPage(),
       },
       home: MyFormularioPage(),
     );
@@ -68,8 +69,8 @@ class Post {
 }
 
 class _MyFormularioPage extends State<MyFormularioPage> {
-  //static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
-  static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
+  static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
+  //static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
 
   static const headers = {
     'apiKey': '12039i10238129038',
@@ -551,10 +552,10 @@ class _MyFormularioPage extends State<MyFormularioPage> {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
     }
-    await Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => TemperaturaPage()),
-    );
+    //await Navigator.push(
+    // context, MaterialPageRoute(builder: (context) => TemperaturaPage()),
+   // );
+    await Navigator.of(context).pushNamed('/temperatura');
   }
 
   Future onDidReceiveLocalNotification(
@@ -578,9 +579,9 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   void setupNotification() async {
     //HORA
-    var time = Time(5, 33, 0);
+    var time = Time(8, 0, 0);
     var time1 = Time(14, 0, 0);
-    var time2 = Time(18, 0, 0);
+    var time2 = Time(18, 00, 0);
     var time3 = Time(22, 0, 0);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'repeatDailyAtTime channel id',
