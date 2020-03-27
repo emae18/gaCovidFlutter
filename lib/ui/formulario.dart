@@ -96,8 +96,6 @@ class _MyFormularioPage extends State<MyFormularioPage> {
   var _direccionNumeroController = TextEditingController();
   var _telefonoController = TextEditingController();
 
-  File _dniFile;
-  File selfieFile;
   final _formKey = GlobalKey<FormState>();
   var _aceptarHabilitado = true;
   var _menuHabilitado = false;
@@ -411,7 +409,6 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                         setState(() {
                           _aceptarHabilitado = false;
                         });
-                        //bool imagesUploaded = ! (_dniFile == null) || !(selfieFile == null) ? false : true;
                         if (_formKey.currentState.validate()) {
                           final form = Post(
                             dni: int.parse(_dniController.text),
@@ -510,116 +507,6 @@ class _MyFormularioPage extends State<MyFormularioPage> {
     return await prefs.setInt('savedDniNumber', dni);
   }
 
-  void _openDniGallery(BuildContext context) async {
-    var picture = await ImagePicker.pickImage(source: ImageSource.gallery);
-    this.setState(() {
-      _dniFile = picture;
-    });
-    Navigator.of(context).pop();
-  }
-
-  void _openDniCamera(BuildContext context) async {
-    var picture = await ImagePicker.pickImage(source: ImageSource.camera);
-    this.setState(() {
-      _dniFile = picture;
-    });
-    Navigator.of(context).pop();
-  }
-
-  void _openSelfieGallery(BuildContext context) async {
-    var picture = await ImagePicker.pickImage(source: ImageSource.gallery);
-    this.setState(() {
-      selfieFile = picture;
-    });
-    Navigator.of(context).pop();
-  }
-
-  void _openSelfieCamera(BuildContext context) async {
-    var picture = await ImagePicker.pickImage(source: ImageSource.camera);
-    this.setState(() {
-      selfieFile = picture;
-    });
-    Navigator.of(context).pop();
-  }
-
-  Future<void> _showDniImagePickerChoiceDialog(context) {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text(
-                    'Seleccionar imagen desde: ',
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                  SizedBox(height: 20.0),
-                  InkWell(
-                    child: Text(
-                      'Galeria',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onTap: () {
-                      _openDniGallery(context);
-                    },
-                  ),
-                  SizedBox(height: 20.0),
-                  InkWell(
-                    child: Text(
-                      'Camara',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onTap: () {
-                      _openDniCamera(context);
-                    },
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
-  Future<void> _showSelfieImagePickerChoiceDialog(context) {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text(
-                    'Seleccionar imagen desde: ',
-                    style: TextStyle(fontSize: 22.0),
-                  ),
-                  SizedBox(height: 20.0),
-                  InkWell(
-                    child: Text(
-                      'Galeria',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onTap: () {
-                      _openSelfieGallery(context);
-                    },
-                  ),
-                  SizedBox(height: 20.0),
-                  InkWell(
-                    child: Text(
-                      'Camara',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onTap: () {
-                      _openSelfieCamera(context);
-                    },
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
   void showInSnackBar(String value) {
     SnackBar mySnackBar = SnackBar(
       content: InkWell(
@@ -691,7 +578,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   void setupNotification() async {
     //HORA
-    var time = Time(10, 0, 0);
+    var time = Time(5, 33, 0);
     var time1 = Time(14, 0, 0);
     var time2 = Time(18, 0, 0);
     var time3 = Time(22, 0, 0);
