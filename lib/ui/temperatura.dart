@@ -50,7 +50,7 @@ class Post {
 }
 
 class _MyTemperaturaPage extends State<MyTemperaturaPage> {
-  static const API = 'http://coe.jujuy.gob.ar/covid19/registro';
+  static const API = 'http://coe.jujuy.gob.ar/covid19/temperatura';
   //static const API = 'https://prueba-3ac16.firebaseio.com/personas.json';
 
   static const headers = {
@@ -60,7 +60,7 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
 
   Future<bool> enviarTemperatura(Post item) {
     return http.post(API, body: json.encode(item.toJson())).then((data) {
-      print('STATUS ' + data.statusCode.toString());
+      //print('STATUS ' + data.statusCode.toString());
       if (data.statusCode == 200) {
         setState(() {
           _menuHabilitado = true;
@@ -225,7 +225,7 @@ class _MyTemperaturaPage extends State<MyTemperaturaPage> {
                                           BorderSide(color: Colors.white))),
                               validator: (String value) {
                                 return value.isEmpty
-                                    ? 'El campo es obligatorio'
+                                    ? 'El campo es obligatorio': value.length != 2 ? 'La temperatura ingresada no es valida'
                                     : null;
                               },
                             ),

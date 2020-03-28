@@ -97,7 +97,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
 
   Future<bool> enviarResultados(Post item) {
     return http.post(API, body: json.encode(item.toJson())).then((data) {
-      print('STATUS ' + data.statusCode.toString());
+      //print('STATUS ' + data.statusCode.toString());
       if (data.statusCode == 200) {
         setState(() {
           _menuHabilitado = true;
@@ -186,8 +186,8 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
       tos: widget.respuestas[3] == 1 ? true : false,
       dif_respirar: widget.respuestas[4] == 1 ? true : false,
       riesgo: _riesgo,
-      latitud:  -24.385128,
-      longitud: -65.126089,
+      latitud:  _latitud,
+      longitud: _longitud,
     );
     var connectivityResult =
     await (Connectivity().checkConnectivity());
@@ -214,6 +214,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final lat = prefs.getDouble('latitud');
     final long = prefs.getDouble('longitud');
+    //print('latitud '+lat.toString()+', longitud '+long.toString());
 
     if (lat == null || long == null) {
       setState(() {
@@ -254,6 +255,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
               child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
+                SizedBox(height: 20.0),
                 Center(
                   child: Text(
                     'Resultado',
@@ -315,7 +317,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
                 SizedBox(height: 30.0),
                 Center(
                   child: Text(
-                    'El gobierno de Jujuy brindara ayuda, consejos e información sobre su estado y también sobre el operativo provincial con respecto al Covid19. '
+                    'El gobierno de Jujuy brindará ayuda, consejos e información sobre su estado y también sobre el operativo provincial con respecto al Covid19. '
                     'Manténgase informado de las recomendaciones en la página oficial del COE.'
                     ' El resultado de este cuestionario es meramente orientativo, '
                     'y se enmarca en la confidencialidad de los datos correspondientes a una relación médico-paciente.',
@@ -323,6 +325,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
                     style: TextStyle(color: Colors.white, fontSize: 18.0),
                   ),
                 ),
+                SizedBox(height: 20.0),
                 Center(
                   child: Text(
                     (_riesgo == 1)
@@ -351,7 +354,7 @@ class _MyResultadosPageState extends State<MyResultadosPage> {
                         Navigator.of(context).pushNamed('/main');
                       },
                       child: Text(
-                        'Menu principal',
+                        'Menú principal',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             color: Colors.white,

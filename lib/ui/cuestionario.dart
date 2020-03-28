@@ -18,7 +18,7 @@ class MyCuestionarioPage extends StatefulWidget {
 
 class _MyCuestionarioPageState extends State<MyCuestionarioPage> {
   var preguntas = [
-    '¿En los últimos 14 días ha regresado de viaje de una zona potencial de riesgo?',
+    '¿En los últimos 14 días estuvo fuera de la provincia de Jujuy?',
     '¿En los últimos 14 días ha estado en contacto con alguien al que se le haya diagnosticado o sea sospechoso de tener coronavirus?',
     '¿Tiene fiebre mayor a 38ºC?',
     '¿Tiene tos seca?',
@@ -47,6 +47,7 @@ class _MyCuestionarioPageState extends State<MyCuestionarioPage> {
             child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
+                SizedBox(height: 20.0),
                 Center(
                     child: Text(
                       'Responda todas las preguntas',

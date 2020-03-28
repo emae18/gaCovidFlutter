@@ -79,7 +79,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   Future<bool> enviarFormulario(Post item) {
     return http.post(API, body: json.encode(item.toJson())).then((data) {
-      print('STATUS ' + data.toString());
+      //print('STATUS ' + data.toString());
       if (data.statusCode == 200) {
         return true;
       }
@@ -157,7 +157,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                   SizedBox(height: 20.0),
                   Center(
                     child: Text(
-                      'El gobierno de Jujuy brindara ayuda, consejos e información sobre su estado y también sobre el operativo provincial con respecto al Covid19.'
+                      'El gobierno de Jujuy brindará ayuda, consejos e información sobre su estado y también sobre el operativo provincial con respecto al Covid19.'
                       ' Manténgase informado de las recomendaciones en la página oficial del COE.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -211,7 +211,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                 errorStyle: TextStyle(
                                   color: Colors.white,
                                 ),
-                                hintText: 'Ingrese su dni',
+                                hintText: 'Ingrese su dni sin puntos',
                                 labelText: 'DNI',
                                 labelStyle: TextStyle(
                                   fontFamily: 'Montserrat',
@@ -223,7 +223,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                         BorderSide(color: Colors.white))),
                             validator: (String value) {
                               return value.isEmpty
-                                  ? 'El campo es obligatorio'
+                                  ? 'El campo es obligatorio' : value.contains('.') || value.contains(',') ? 'Porfavor ingrese el dni sin simbolos'
                                   : null;
                             },
                           ),
@@ -385,7 +385,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                                     BorderSide(color: Colors.white))),
                             validator: (String value) {
                               return value.isEmpty
-                                  ?  'El campo es obligatorio'
+                                  ?  'El campo es obligatorio' : value.length <= 6 ? 'El nro es demasiado corto, ingrese un nro valido'
                                   : null;
                             },
                           ),
@@ -394,7 +394,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
                     ),
                   ),
                   //SizedBox(height: 40.0),
-                  SizedBox(height: 30.0),
+                  SizedBox(height: 80.0),
                   Visibility(
                     visible: _aceptarHabilitado,
                     child: RaisedButton(
@@ -526,7 +526,7 @@ class _MyFormularioPage extends State<MyFormularioPage> {
   void _handleConfirmFirstMesseage(GlobalKey<ScaffoldState> _scaffoldKey) {
     confirmFirstMesseage(context, _scaffoldKey).then((bool value) {
       if (value) {
-        showInSnackBar('Terminos y condiciones de úso aceptados');
+        showInSnackBar('Términos y condiciones de uso aceptados');
       }
     });
   }
@@ -551,24 +551,32 @@ class _MyFormularioPage extends State<MyFormularioPage> {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
     }
-    //await Navigator.push(
-    // context, MaterialPageRoute(builder: (context) => TemperaturaPage()),
-   // );
-    await Navigator.of(context).pushNamed('/temperatura');
+    await Navigator.push(
+      context, MaterialPageRoute(builder: (context) => TemperaturaPage()),
+    );
+    //await Navigator.of(context).pushNamed('/temperatura');
   }
 
   Future onDidReceiveLocalNotification(
-      int id, String title, String body, String payload) async {
+      int id, String title, String body, String payload) async{
     // display a dialog with the notification details, tap ok to go to another page
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        content: Text('body'),
-        actions: <Widget>[
-          FlatButton(
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
             child: Text('Ok'),
-            onPressed: () {
-              Navigator.of(context).pop();
+            onPressed: () async {
+              Navigator.of(context, rootNavigator: true).pop();
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TemperaturaPage(),
+                ),
+              );
             },
           )
         ],
@@ -578,10 +586,10 @@ class _MyFormularioPage extends State<MyFormularioPage> {
 
   void setupNotification() async {
     //HORA
-    var time = Time(8, 0, 0);
+    var time = Time(10, 0, 0);
     var time1 = Time(14, 0, 0);
-    var time2 = Time(18, 00, 0);
-    var time3 = Time(22, 0, 0);
+    var time2 = Time(18, 0, 00);
+    var time3 = Time(22, 0, 00);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'repeatDailyAtTime channel id',
         'repeatDailyAtTime temperatura',

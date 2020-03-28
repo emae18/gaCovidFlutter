@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:covidjujuy_app/ui/formulario.dart';
+import 'package:covidjujuy_app/ui/temperatura.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gps/gps.dart';
@@ -107,7 +108,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
   void _getLatitudLongitud() async {
     var latlng = await Gps.currentGps();
-    print('GEO POS ' + latlng.toString());
+    //print('GEO POS ' + latlng.toString());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('latitud', double.parse(latlng.lat));
     await prefs.setDouble('longitud', double.parse(latlng.lng));
@@ -126,7 +127,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
     if (permission == PermissionStatus.granted) {
       // SERVICIO ENCENDIDO
       if (serviceStatus == ServiceStatus.enabled) {
-        print('SERVICIO ARRIBA ENTONCES SETEAR LONG Y LAT');
+        //print('SERVICIO ARRIBA ENTONCES SETEAR LONG Y LAT');
         _getLatitudLongitud();
         setState(() {
           _locationUp = true;
@@ -134,7 +135,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
         _termCondAceptados ?
           Navigator.of(context).pushNamed('/cuestionario') :
           showInSnackBar(
-              'No podrá usar la app si no acepta los términos y condiciones de úso');
+              'No podrá usar la app si no acepta los términos y condiciones de uso');
         // PERMISO RECHAZADO
       } else {
         showInSnackBar(
@@ -142,7 +143,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
       }
       // SERVICIO ABAJO
     } else if(permission == PermissionStatus.neverAskAgain) {
-      showDialog(
+      await showDialog(
         context: context,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
@@ -151,21 +152,14 @@ class _MyLoginPageState extends State<MyLoginPage> {
             children: <Widget>[
               Center(
                 child: Text(
-                  'Para usar la app debe tener ubicación encendida y aceptar los permisos',
+                  'Para usar la app deberá tener la ubicación encendida y aceptar los permisos',
                   style: TextStyle(
                       fontSize: 22.0, fontFamily: 'Montserrat'),
                 ),
               ),
               Center(
                 child: Text(
-                  'A continuación por favor acepte los permisos',
-                  style: TextStyle(
-                      fontSize: 18.0, fontFamily: 'Montserrat'),
-                ),
-              ),
-              Center(
-                child: Text(
-                  'Si usted bloqueo los permisos que requiere la aplicación, porfavor habilitelos desde la configuracion de su dispostivo',
+                  'Si usted bloqueó los permisos que requiere la aplicación, por favor habilitelos desde la configuracion de su dispostivo',
                   style: TextStyle(
                       fontSize: 18.0, fontFamily: 'Montserrat'),
                 ),
@@ -179,7 +173,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
               children: <Widget>[
                 FlatButton(
                   child: Text(
-                    'Abrir los permisos',
+                    'Aceptar',
                     style: TextStyle(
                         color: Colors.blueAccent,
                         fontWeight: FontWeight.bold,
@@ -187,8 +181,9 @@ class _MyLoginPageState extends State<MyLoginPage> {
                         fontFamily: 'Montserrat'),
                   ),
                   onPressed: () async {
-                    await PermissionHandler().openAppSettings();
+                    //await PermissionHandler().openAppSettings();
                     Navigator.of(context).pop();
+                    await PermissionHandler().openAppSettings();
                   },
                 ),
               ],
@@ -356,7 +351,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                           child: Center(
                             child: InkWell(
                               child: Text(
-                                'Ver terminos y condiciones de úso',
+                                'Ver términos y condiciones de uso',
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),
@@ -449,7 +444,8 @@ Future<bool> confirmGeolocalizationDialog(
             children: <Widget>[
               Center(
                 child: Text(
-                  'Acepta los términos y condiciones de úso?',
+                  '¿Acepta los términos y condiciones de uso?',
+                  textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 22.0, fontFamily: 'Montserrat'),
                 ),
               ),
