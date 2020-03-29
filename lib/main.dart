@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/cuestionario': (BuildContext context) => CuestionarioPage(),
         '/formulario': (BuildContext context) => FormularioPage(),
+        '/main': (BuildContext context) => MyApp(),
       },
       home: MyLoginPage(),
     );
@@ -40,6 +41,321 @@ class _MyLoginPageState extends State<MyLoginPage> {
   bool _termCondAceptados = false;
   bool _locationUp = false;
   int _dni = 0;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    _launchFirstTermCondDialogConfirmation();
+    //_getDniFromSharedPref();
+    //_cleanSharedPreferences();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ));
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        key: _scaffoldKey,
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          child: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.blue[900], Colors.lightBlue],
+                  )),
+              height: MediaQuery.of(context).size.height,
+              child: Container(
+                child: build_child(),
+              )
+          ),
+        ),
+      ),
+    );
+   /*return Scaffold(
+     key: _scaffoldKey,
+     resizeToAvoidBottomInset: false,
+     body: Container(
+       child: Container(
+           decoration: BoxDecoration(
+               gradient: LinearGradient(
+                 begin: Alignment.bottomCenter,
+                 end: Alignment.topCenter,
+                 colors: [Colors.blue[900], Colors.lightBlue],
+               )),
+           height: MediaQuery.of(context).size.height,
+           child: Container(
+             child: build_child(),
+           )
+       ),
+     ),
+   );*/
+  }
+
+  Widget build_child() {
+    if(_loaded)
+      {
+         return SingleChildScrollView(
+           child: SafeArea(
+               child: Column(
+                 children: <Widget>[
+                   Container(
+                     padding: EdgeInsets.only(top: 20),
+                     child: Column(
+                       children: <Widget>[
+                         Image.asset(
+                           'assets/graphics/GOBCOEJUwide.jpg',
+                           width: 300,
+                         ),
+                         SizedBox(height: 20.0),
+                         Text(
+                           'Cuestionario',
+                           style: TextStyle(
+                             fontSize: 45.0,
+                             fontWeight: FontWeight.bold,
+                             color: Colors.white,
+                             shadows: [
+                               Shadow(
+                                 blurRadius: 10.0,
+                                 color: Colors.black.withOpacity(0.4),
+                                 offset: Offset(0.0, 3.0),
+                               ),
+                             ],
+                           ),
+                         ),
+                         Text(
+                           'COVID-19',
+                           style: TextStyle(
+                             fontSize: 30.0,
+                             color: Colors.white,
+                             shadows: [
+                               Shadow(
+                                 blurRadius: 10.0,
+                                 color: Colors.black.withOpacity(0.4),
+                                 offset: Offset(0.0, 3.0),
+                               ),
+                             ],
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   Container(
+                     padding: EdgeInsets.only(left: 20.0, right: 20.0),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: <Widget>[
+                         SizedBox(height: 50.0),
+                         Center(
+                           child: Text(
+                             _dni != 0
+                                 ? 'Todas las respuestas en este dispositivo serán enviadas con este dni: $_dni'
+                                 : '',
+                             textAlign: TextAlign.center,
+                             style: TextStyle(
+                               color: Colors.white,
+                               fontSize: 22.0,
+                               fontWeight: FontWeight.bold,
+                               fontFamily: 'Montserrat',
+                             ),
+                           ),
+                         ),
+                         SizedBox(height: 60.0),
+                         Container(
+                           child: Center(
+                             child: RaisedButton(
+                               padding: EdgeInsets.only(
+                                   top: 10.0,
+                                   bottom: 10.0,
+                                   left: 90.0,
+                                   right: 90.0),
+                               color: Colors.lightGreen,
+                               splashColor: Colors.blueAccent,
+                               elevation: 4,
+                               shape: RoundedRectangleBorder(
+                                 borderRadius: BorderRadius.circular(24.0),
+                               ),
+                               onPressed: () async {
+                                 _dni == 0 ? _getDniFromSharedPref() :
+                                 (!_termCondAceptados ? _launchTermCondDialogConfirmation() :
+                                 _checkPermissions());
+                                 //_getDniFromSharedPref();
+                                 //_checkPermissions();
+                               },
+                               child: Text(
+                                 'Cuestionario covid-19',
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     color: Colors.white,
+                                     fontSize: 22.0,
+                                     fontWeight: FontWeight.bold,
+                                     fontFamily: 'Montserrat'),
+                               ),
+                             ),
+                           ),
+                         ),
+                         SizedBox(height: 20.0),
+                         Container(
+                           child: Center(
+                             child: RaisedButton(
+                               padding: EdgeInsets.only(
+                                   top: 10.0,
+                                   bottom: 10.0,
+                                   left: 60.0,
+                                   right: 60.0),
+                               color: Colors.white,
+                               splashColor: Colors.blueAccent,
+                               elevation: 4,
+                               shape: RoundedRectangleBorder(
+                                 borderRadius: BorderRadius.circular(24.0),
+                               ),
+                               onPressed: () {
+                                 //Navigator.of(context).pushNamed('/coe');
+                                 _launchInBroser(_coelaunchUrl);
+                               },
+                               child: Text(
+                                 'Información oficial COE',
+                                 textAlign: TextAlign.center,
+                                 style: TextStyle(
+                                     color: Colors.black,
+                                     fontSize: 22.0,
+                                     fontWeight: FontWeight.bold,
+                                     fontFamily: 'Montserrat'),
+                               ),
+                             ),
+                           ),
+                         ),
+                         SizedBox(height: 30),
+                         Visibility(
+                           visible: !_termCondAceptados,
+                           child: Container(
+                             child: Center(
+                               child: InkWell(
+                                 child: Text(
+                                   'Ver términos y condiciones de uso',
+                                   style: TextStyle(
+                                     color: Colors.white,
+                                   ),
+                                 ),
+                                 onTap: () {
+                                   _handleFirsGeoConfirmation(_scaffoldKey);
+                                 },
+                               ),
+                             ),
+                           ),
+                         ),
+                         SizedBox(height: 20.0),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: <Widget>[
+                             Center(
+                               child: Image.asset(
+                                 'assets/graphics/JujuyEnergiaVivaTrazoNegro.png',
+                                 height: 40,
+                               ),
+                             ),
+                             Container(
+                                 child: Image.asset(
+                                   'assets/graphics/GA_logo.png',
+                                   height: 30,
+                                 )),
+                             Container(
+                                 child: Text(
+                                   '@GA_ide',
+                                   style: TextStyle(color: Colors.white),
+                                 )),
+                           ],
+                         ),
+                       ],
+                     ),
+                   ),
+                 ],
+               )),
+         );
+      }else{
+      return Container(
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 20.0),
+              Image.asset(
+                'assets/graphics/banner.png',
+                width: 200,
+              ),
+              SizedBox(height: 20.0),
+              Text(
+                'Cuestionario',
+                style: TextStyle(
+                  fontSize: 45.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.black.withOpacity(0.4),
+                      offset: Offset(0.0, 3.0),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                'COVID-19',
+                style: TextStyle(
+                  fontSize: 30.0,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.black.withOpacity(0.4),
+                      offset: Offset(0.0, 3.0),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 100.0),
+              Visibility(
+                visible: !_loaded,
+                child: Container(
+                  child: Center(
+                    child: RaisedButton(
+                      padding: EdgeInsets.only(
+                          top: 10.0,
+                          bottom: 10.0,
+                          left: 60.0,
+                          right: 60.0),
+                      color: Colors.lightGreen,
+                      splashColor: Colors.blueAccent,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                      onPressed: () {
+                        _getDniFromSharedPref();
+                      },
+                      child: Text(
+                        'Ingresar',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40.0,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat'),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+  }
 
   Future<void> _getDniFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -47,13 +363,14 @@ class _MyLoginPageState extends State<MyLoginPage> {
     if (startupDniNumber == null) {
       setState(() {
         _dni = 0;
+        _loaded = false;
       });
       Navigator.of(context).pushNamed('/formulario');
     } else {
       setState(() {
         _dni = startupDniNumber;
+        _loaded = true;
       });
-      _launchTermCondDialogConfirmation();
     }
   }
 
@@ -89,8 +406,12 @@ class _MyLoginPageState extends State<MyLoginPage> {
     await _getTermCondAceptadosFromSharedPref().then(_updateTermAndCondt);
     if (!_termCondAceptados) {
       WidgetsBinding.instance.addPostFrameCallback(
-          (_) => _handleFirsGeoConfirmation(_scaffoldKey));
+              (_) => _handleFirsGeoConfirmation(_scaffoldKey));
     }
+  }
+
+  Future<void> _launchFirstTermCondDialogConfirmation() async {
+    await _getTermCondAceptadosFromSharedPref().then(_updateTermAndCondt);
   }
 
   void _updateTermAndCondt(bool value) {
@@ -116,284 +437,30 @@ class _MyLoginPageState extends State<MyLoginPage> {
 
   void _checkPermissions() async {
     Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler()
-            .requestPermissions([PermissionGroup.location]);
+    await PermissionHandler()
+        .requestPermissions([PermissionGroup.location]);
     PermissionStatus permission = await PermissionHandler()
         .checkPermissionStatus(PermissionGroup.location);
     ServiceStatus serviceStatus =
-        await PermissionHandler().checkServiceStatus(PermissionGroup.location);
+    await PermissionHandler().checkServiceStatus(PermissionGroup.location);
 
-    // PERMISO PERMITIDO
     if (permission == PermissionStatus.granted) {
-      // SERVICIO ENCENDIDO
       if (serviceStatus == ServiceStatus.enabled) {
-        //print('SERVICIO ARRIBA ENTONCES SETEAR LONG Y LAT');
         _getLatitudLongitud();
         setState(() {
           _locationUp = true;
         });
-        _termCondAceptados ?
-          Navigator.of(context).pushNamed('/cuestionario') :
-          showInSnackBar(
-              'No podrá usar la app si no acepta los términos y condiciones de uso');
-        // PERMISO RECHAZADO
+        _termCondAceptados && _dni != 0 ?
+        Navigator.of(context).pushNamed('/cuestionario') :
+        showInSnackBar(
+            'No podrá usar la app si no acepta los términos y condiciones de uso');
       } else {
         showInSnackBar(
             'Para usar la aplicacion mantenga prendida la ubicación gps');
       }
-      // SERVICIO ABAJO
     } else if(permission == PermissionStatus.neverAskAgain) {
-      await showDialog(
-        context: context,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.0)),
-          title: Column(
-            children: <Widget>[
-              Center(
-                child: Text(
-                  'Para usar la app deberá tener la ubicación encendida y aceptar los permisos',
-                  style: TextStyle(
-                      fontSize: 22.0, fontFamily: 'Montserrat'),
-                ),
-              ),
-              Center(
-                child: Text(
-                  'Si usted bloqueó los permisos que requiere la aplicación, por favor habilitelos desde la configuracion de su dispostivo',
-                  style: TextStyle(
-                      fontSize: 18.0, fontFamily: 'Montserrat'),
-                ),
-              ),
-            ],
-          ),
-          elevation: 7.0,
-          //backgroundColor: Colors.grey,
-          actions: <Widget>[
-            Row(
-              children: <Widget>[
-                FlatButton(
-                  child: Text(
-                    'Aceptar',
-                    style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22.0,
-                        fontFamily: 'Montserrat'),
-                  ),
-                  onPressed: () async {
-                    //await PermissionHandler().openAppSettings();
-                    Navigator.of(context).pop();
-                    await PermissionHandler().openAppSettings();
-                  },
-                ),
-              ],
-            )
-          ],
-        ),
-      );
+      _handleConfirmPermissions(_scaffoldKey);
     }
-  }
-
-  @override
-  void initState() {
-    _getDniFromSharedPref();
-    //_cleanSharedPreferences();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
-    return Scaffold(
-      key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        child: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            colors: [Colors.blue[900], Colors.lightBlue],
-          )),
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: SafeArea(
-                child: Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Column(
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/graphics/GOBCOEJUwide.jpg',
-                        width: 300,
-                      ),
-                      SizedBox(height: 20.0),
-                      Text(
-                        'Cuestionario',
-                        style: TextStyle(
-                          fontSize: 45.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black.withOpacity(0.4),
-                              offset: Offset(0.0, 3.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        'COVID-19',
-                        style: TextStyle(
-                          fontSize: 30.0,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black.withOpacity(0.4),
-                              offset: Offset(0.0, 3.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(left: 20.0, right: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(height: 50.0),
-                      Center(
-                        child: Text(
-                          _dni != 0
-                              ? 'Todas las respuestas en este dispositivo serán enviadas con este dni: $_dni'
-                              : '',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Montserrat',
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 60.0),
-                      Container(
-                        child: Center(
-                          child: RaisedButton(
-                            padding: EdgeInsets.only(
-                                top: 10.0,
-                                bottom: 10.0,
-                                left: 90.0,
-                                right: 90.0),
-                            color: Colors.lightGreen,
-                            splashColor: Colors.blueAccent,
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            onPressed: () async {
-                              _checkPermissions();
-                            },
-                            child: Text(
-                              'Cuestionario covid-19',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Montserrat'),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Container(
-                        child: Center(
-                          child: RaisedButton(
-                            padding: EdgeInsets.only(
-                                top: 10.0,
-                                bottom: 10.0,
-                                left: 60.0,
-                                right: 60.0),
-                            color: Colors.white,
-                            splashColor: Colors.blueAccent,
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24.0),
-                            ),
-                            onPressed: () {
-                              //Navigator.of(context).pushNamed('/coe');
-                              _launchInBroser(_coelaunchUrl);
-                            },
-                            child: Text(
-                              'Información oficial COE',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Montserrat'),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      Visibility(
-                        visible: !_termCondAceptados,
-                        child: Container(
-                          child: Center(
-                            child: InkWell(
-                              child: Text(
-                                'Ver términos y condiciones de uso',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              onTap: () {
-                                _handleFirsGeoConfirmation(_scaffoldKey);
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Center(
-                            child: Image.asset(
-                              'assets/graphics/JujuyEnergiaVivaTrazoNegro.png',
-                              height: 40,
-                            ),
-                          ),
-                          Container(
-                              child: Image.asset(
-                            'assets/graphics/GA_logo.png',
-                            height: 30,
-                          )),
-                          Container(
-                              child: Text(
-                            '@GA_ide',
-                            style: TextStyle(color: Colors.white),
-                          )),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )),
-          ),
-        ),
-      ),
-    );
   }
 
   void showInSnackBar(String value) {
@@ -417,11 +484,26 @@ class _MyLoginPageState extends State<MyLoginPage> {
     _scaffoldKey.currentState.showSnackBar(mySnackBar);
   }
 
+  void _handleConfirmPermissions(GlobalKey<ScaffoldState> _scaffoldKey) {
+    confirmPermissions(context, _scaffoldKey).then((bool value) {
+      if (value) {
+        showInSnackBar(
+            'Recuerde que si no acepta los permisos no podrá usar la aplicación');
+      } else {
+        showInSnackBar(
+            'Para usar la aplicacion deberá aceptar los terminos y condiciones de úso');
+      }
+    });
+  }
+
   void _handleFirsGeoConfirmation(GlobalKey<ScaffoldState> _scaffoldKey) {
     confirmGeolocalizationDialog(context, _scaffoldKey).then((bool value) {
       if (value) {
         _setTermCondAceptadosFromSharedPref().then((bool commited) {
-          _launchTermCondDialogConfirmation();
+          //_launchTermCondDialogConfirmation();
+          setState(() {
+            _termCondAceptados = true;
+          });
         });
       } else {
         showInSnackBar(
@@ -429,6 +511,72 @@ class _MyLoginPageState extends State<MyLoginPage> {
       }
     });
   }
+}
+Future<bool> confirmPermissions(
+    BuildContext context, GlobalKey<ScaffoldState> _scaffoldKey) {
+  showDialog(
+    context: context,
+    child: AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.0)),
+      title: Column(
+        children: <Widget>[
+          Center(
+            child: Text(
+              'Para usar la app deberá tener la ubicación encendida y aceptar los permisos',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 22.0, fontFamily: 'Montserrat'),
+            ),
+          ),
+          Center(
+            child: Text(
+              'Si usted bloqueó los permisos que requiere la aplicación, por favor habilitelos desde la configuracion de su dispostivo',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 18.0, fontFamily: 'Montserrat'),
+            ),
+          ),
+        ],
+      ),
+      elevation: 7.0,
+      //backgroundColor: Colors.grey,
+      actions: <Widget>[
+        Row(
+          children: <Widget>[
+            FlatButton(
+              child: Text(
+                'Aceptar',
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22.0,
+                    fontFamily: 'Montserrat'),
+              ),
+              onPressed: () async {
+                await PermissionHandler().openAppSettings();
+                Navigator.of(context).pop(true);
+              },
+            ),
+            FlatButton(
+              child: Text(
+                'Cerrar',
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22.0,
+                    fontFamily: 'Montserrat'),
+              ),
+              onPressed: (){
+                //Navigator.of(context).pushNamed('/main');
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        )
+      ],
+    ),
+  );
 }
 
 Future<bool> confirmGeolocalizationDialog(
