@@ -1,2 +1,2 @@
 # gaCovidFlutter
-AQuí cosas de la app
+La versión Final esta en la rama api/COE
